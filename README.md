@@ -67,6 +67,15 @@ gradually and other stations rose at the same hours.
 ### 5. Order of cleaning (lesson learned)
 Remove bad readings first, then fill short gaps. Doing it the other way round filled
 a gap using two fake readings next to it.
+### Cleaning pipeline (reusable functions)
+- build_timeline: sorts, removes duplicates, inserts a blank row for every missing hour
+- flag_faults: rule 1 (PM2.5 more than 20 above PM10), rule 2 (4+ hours within 2 units, at or above 150),
+  rule 3 (a value of 150+ that is more than 5x the median of the 12 surrounding hours)
+- stretch_flags: widens each flagged hour by 1 hour on each side
+- fill_short_gaps: linear interpolation for gaps of 6 hours or less, longer gaps stay blank
+- clean_data: runs all of the above in the right order and returns the cleaned table plus a report of removed hours
+Result: 81 hours removed, max PM2.5 fell from 683 to 360, 903 blank hours (6.4%) remain.
+Known limitation: stretching also removes some good hours next to a fault, and rules cannot tell a frozen sensor from a real event, so flags are reviewed by hand.
 
 ### 6. Result
 Blank PM2.5 hours: 1,330 raw, 1,356 after fault removal, 894 after filling short gaps
